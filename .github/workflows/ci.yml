@@ -33,4 +33,4 @@ jobs:
         run: flutter test --coverage
 
       - name: Build APK
-        run: flutter build apk --debuggit add .github
+        run: flutter build apk --debug
