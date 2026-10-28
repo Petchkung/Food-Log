@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "523105800573",
+    "project_id": "food-log-kmitl",
+    "storage_bucket": "food-log-kmitl.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:523105800573:android:b97d24ba4c3430abecbc14",
+        "android_client_info": {
+          "package_name": "com.kmitl.food_log"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAxt-5KYLWDNzkJHp8DLezdq5zMzhjEkpw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
