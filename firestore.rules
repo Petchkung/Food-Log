@@ -1,0 +1,38 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ผู้ใช้ที่ล็อกอินและเป็นเจ้าของ path นี้เท่านั้น
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    // ตรวจข้อมูลอาหารที่จะเขียน: ช่องครบ ชนิดถูก ค่าอยู่ในช่วง
+    function validEntry(uid, entryId) {
+      let d = request.resource.data;
+      let fields = ['id', 'userId', 'name', 'calories', 'protein', 'carbs',
+                    'fat', 'mealType', 'eatenAt', 'updatedAt'];
+      return d.keys().hasAll(fields) && d.keys().hasOnly(fields)
+        && d.id == entryId
+        && d.userId == uid
+        && d.name is string && d.name.size() > 0 && d.name.size() <= 80
+        && d.calories is number && d.calories >= 0 && d.calories <= 5000
+        && d.protein is number && d.protein >= 0 && d.protein <= 1000
+        && d.carbs is number && d.carbs >= 0 && d.carbs <= 1000
+        && d.fat is number && d.fat >= 0 && d.fat <= 1000
+        && d.mealType in ['breakfast', 'lunch', 'dinner', 'snack']
+        && d.eatenAt is int && d.updatedAt is int;
+    }
+
+    match /users/{uid}/entries/{entryId} {
+      allow read, delete: if isOwner(uid);
+      allow create, update: if isOwner(uid) && validEntry(uid, entryId);
+    }
+
+    // นอกจากนี้ ห้ามทุกอย่าง
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
