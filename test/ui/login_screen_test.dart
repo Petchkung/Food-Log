@@ -3,14 +3,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:food_log/app/app.dart';
 
 import '../helpers/fake_auth_service.dart';
+import '../helpers/fake_food_repository.dart';
 
 void main() {
   late FakeAuthService auth;
 
   setUp(() => auth = FakeAuthService());
 
-  Future<void> openApp(WidgetTester tester) =>
-      tester.pumpWidget(FoodLogApp(auth: auth));
+  Future<void> openApp(WidgetTester tester) => tester.pumpWidget(
+      FoodLogApp(auth: auth, repository: FakeFoodRepository()));
 
   Future<void> fillAndSubmit(WidgetTester tester, String email, String password) async {
     await tester.enterText(find.byKey(const Key('emailField')), email);

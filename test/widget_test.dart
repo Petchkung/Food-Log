@@ -3,10 +3,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:food_log/app/app.dart';
 
 import 'helpers/fake_auth_service.dart';
+import 'helpers/fake_food_repository.dart';
 
 void main() {
   testWidgets('ยังไม่ล็อกอิน → เห็นหน้าเข้าสู่ระบบ และใช้ Material 3', (tester) async {
-    await tester.pumpWidget(FoodLogApp(auth: FakeAuthService()));
+    await tester.pumpWidget(
+        FoodLogApp(auth: FakeAuthService(), repository: FakeFoodRepository()));
 
     expect(find.byKey(const Key('emailField')), findsOneWidget);
     final app = tester.widget<MaterialApp>(find.byType(MaterialApp));
