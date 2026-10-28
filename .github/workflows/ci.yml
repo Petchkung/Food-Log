@@ -35,5 +35,8 @@ jobs:
       - name: Run tests with coverage
         run: flutter test --coverage
 
+      - name: Check coverage >= 70%
+        run: dart run tool/coverage.dart 70
+
       - name: Build APK
         run: flutter build apk --debug
