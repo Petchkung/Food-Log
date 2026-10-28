@@ -1,1 +1,25 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"food-log-kmitl","appId":"1:523105800573:android:b97d24ba4c3430abecbc14","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"food-log-kmitl","configurations":{"android":"1:523105800573:android:b97d24ba4c3430abecbc14","ios":"1:523105800573:ios:9169e80cb458aeb0ecbc14"}}}}}}
+{
+  "firestore": {
+    "rules": "firestore.rules"
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "food-log-kmitl",
+          "appId": "1:523105800573:android:b97d24ba4c3430abecbc14",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "food-log-kmitl",
+          "configurations": {
+            "android": "1:523105800573:android:b97d24ba4c3430abecbc14",
+            "ios": "1:523105800573:ios:9169e80cb458aeb0ecbc14"
+          }
+        }
+      }
+    }
+  }
+}
