@@ -15,7 +15,7 @@ class LocalDatabase {
 
   /// เปิดฐานข้อมูล — ตอนเทสต์ส่ง factory = databaseFactoryFfi และ path = inMemoryDatabasePath
   static Future<LocalDatabase> open({DatabaseFactory? factory, String? path}) async {
-    final f = factory ?? databaseFactory;
+    final f = factory ?? databaseFactorySqflitePlugin;
     final dbPath = path ?? p.join(await f.getDatabasesPath(), 'food_log.db');
     final db = await f.openDatabase(
       dbPath,
