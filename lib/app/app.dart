@@ -65,8 +65,14 @@ class _LoggedOutFlow extends StatefulWidget {
 
 class _LoggedOutFlowState extends State<_LoggedOutFlow> {
   bool _showLogin = false;
+  bool _signUp = false;
 
-  void _setShowLogin(bool value) => setState(() => _showLogin = value);
+  void _openLogin({required bool signUp}) => setState(() {
+    _signUp = signUp;
+    _showLogin = true;
+  });
+
+  void _backToWelcome() => setState(() => _showLogin = false);
 
   @override
   Widget build(BuildContext context) {
@@ -74,13 +80,17 @@ class _LoggedOutFlowState extends State<_LoggedOutFlow> {
       // อยู่หน้า Login: ปุ่มย้อนกลับของเครื่องให้กลับ Welcome แทนการปิดแอป
       canPop: !_showLogin,
       onPopInvokedWithResult: (didPop, _) {
-        if (!didPop) _setShowLogin(false);
+        if (!didPop) _backToWelcome();
       },
       child: _showLogin
-          ? LoginScreen(auth: widget.auth, onBack: () => _setShowLogin(false))
+          ? LoginScreen(
+              auth: widget.auth,
+              initialSignUp: _signUp,
+              onBack: _backToWelcome,
+            )
           : WelcomeScreen(
-              onStart: () => _setShowLogin(true),
-              onLogin: () => _setShowLogin(true),
+              onStart: () => _openLogin(signUp: true),
+              onLogin: () => _openLogin(signUp: false),
             ),
     );
   }

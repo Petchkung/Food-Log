@@ -4,13 +4,20 @@ import '../../core/validators.dart';
 import '../../services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key, required this.auth, this.onBack});
+  const LoginScreen({
+    super.key,
+    required this.auth,
+    this.onBack,
+    this.initialSignUp = false,
+  });
 
   final AuthService auth;
 
   /// ถ้ากำหนด จะแสดงปุ่มย้อนกลับ (ใช้กลับไปหน้า Welcome)
   final VoidCallback? onBack;
 
+  /// true = เปิดหน้าในโหมดสมัครสมาชิก
+  final bool initialSignUp;
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
@@ -19,7 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _email = TextEditingController();
   final _password = TextEditingController();
-  bool _isSignUp = false;
+  late bool _isSignUp = widget.initialSignUp;
   bool _busy = false;
   bool _obscure = true;
   String? _error;
