@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
+import '../ui/screens/main_shell.dart';
 import '../data/food_repository.dart';
 import '../services/auth_service.dart';
 import '../state/food_log_controller.dart';
-import '../ui/screens/home_screen.dart';
 import '../ui/screens/login_screen.dart';
 import '../ui/screens/welcome_screen.dart';
 import 'theme.dart';
@@ -46,7 +45,7 @@ class AuthGate extends StatelessWidget {
           key: ValueKey(user.uid), // เปลี่ยนผู้ใช้ = สร้าง Controller ใหม่
           create: (_) =>
               FoodLogController(repository: repository, uid: user.uid)..init(),
-          child: HomeScreen(user: user, auth: auth),
+          child: MainShell(user: user, auth: auth),
         );
       },
     );
