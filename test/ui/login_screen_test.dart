@@ -11,9 +11,14 @@ void main() {
   setUp(() => auth = FakeAuthService());
 
   Future<void> openApp(WidgetTester tester) => tester.pumpWidget(
-      FoodLogApp(auth: auth, repository: FakeFoodRepository()));
+    FoodLogApp(auth: auth, repository: FakeFoodRepository()),
+  );
 
-  Future<void> fillAndSubmit(WidgetTester tester, String email, String password) async {
+  Future<void> fillAndSubmit(
+    WidgetTester tester,
+    String email,
+    String password,
+  ) async {
     await tester.enterText(find.byKey(const Key('emailField')), email);
     await tester.enterText(find.byKey(const Key('passwordField')), password);
     await tester.tap(find.byKey(const Key('submitButton')));
@@ -29,12 +34,13 @@ void main() {
     expect(find.text('กรุณากรอกรหัสผ่าน'), findsOneWidget);
   });
 
-  testWidgets('เข้าสู่ระบบสำเร็จ → ไปหน้าหลัก แล้วออกจากระบบได้', (tester) async {
+  testWidgets('เข้าสู่ระบบสำเร็จ → ไปหน้าหลัก แล้วออกจากระบบได้', (
+    tester,
+  ) async {
     await openApp(tester);
     await fillAndSubmit(tester, 'student@kmitl.ac.th', 'foodlog2026');
 
-    expect(find.text('สวัสดี student@kmitl.ac.th'), findsOneWidget);
-
+    expect(find.text('สวัสดี, student'), findsOneWidget);
     await tester.tap(find.byKey(const Key('signOutButton')));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('emailField')), findsOneWidget);
