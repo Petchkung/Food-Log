@@ -28,21 +28,26 @@ void main() {
     expect(find.byKey(const Key('emailField')), findsNothing);
   });
 
-  testWidgets('กดเริ่มต้นใช้งาน → ไปหน้า Login แล้วกดกลับได้', (tester) async {
+  testWidgets('กดเริ่มต้นใช้งาน → หน้าสมัครสมาชิก แล้วกดกลับได้', (
+    tester,
+  ) async {
     await openApp(tester);
 
     await tapKey(tester, 'welcomeStartButton');
     expect(find.byKey(const Key('emailField')), findsOneWidget);
+    expect(find.text('สมัครสมาชิก'), findsWidgets); // หัวข้อ + ปุ่มส่ง
 
     await tester.tap(find.byKey(const Key('loginBackButton')));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('welcomeStartButton')), findsOneWidget);
   });
 
-  testWidgets('กดมีบัญชีแล้ว? เข้าสู่ระบบ → ไปหน้า Login', (tester) async {
+  testWidgets('กดมีบัญชีแล้ว? เข้าสู่ระบบ → หน้าเข้าสู่ระบบ', (tester) async {
     await openApp(tester);
 
     await tapKey(tester, 'welcomeLoginButton');
     expect(find.byKey(const Key('emailField')), findsOneWidget);
+    expect(find.text('เข้าสู่ระบบ'), findsWidgets); // หัวข้อ + ปุ่มส่ง
+    expect(find.text('สมัครสมาชิก'), findsNothing);
   });
 }
