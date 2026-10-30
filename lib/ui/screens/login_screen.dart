@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/validators.dart';
 import '../../services/auth_service.dart';
+import '../widgets/forgot_password_dialog.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key, required this.auth});
@@ -42,6 +43,37 @@ class _LoginScreenState extends State<LoginScreen> {
       if (mounted) setState(() => _error = e.message);
     } finally {
       if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _googleSignIn() async {
+    setState(() {
+      _error = null;
+      _busy = true;
+    });
+    try {
+      await widget.auth.signInWithGoogle();
+    } on AuthException catch (e) {
+      if (mounted) setState(() => _error = e.message);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _forgotPassword() async {
+    final sent = await showDialog<bool>(
+      context: context,
+      // เติมอีเมลที่พิมพ์ไว้ในหน้า login ให้อัตโนมัติ
+      builder: (_) => ForgotPasswordDialog(
+        auth: widget.auth,
+        initialEmail: _email.text.trim(),
+      ),
+    );
+    if (sent == true && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        key: Key('resetSentMessage'),
+        content: Text('ถ้ามีบัญชีนี้อยู่ เราได้ส่งลิงก์ตั้งรหัสผ่านใหม่ไปที่อีเมลแล้ว'),
+      ));
     }
   }
 
@@ -106,13 +138,22 @@ class _LoginScreenState extends State<LoginScreen> {
                         ? Validators.password
                         : (v) => (v == null || v.isEmpty) ? 'กรุณากรอกรหัสผ่าน' : null,
                   ),
+                  if (!_isSignUp)
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        key: const Key('forgotPasswordButton'),
+                        onPressed: _busy ? null : _forgotPassword,
+                        child: const Text('ลืมรหัสผ่าน?'),
+                      ),
+                    ),
                   if (_error != null) ...[
                     const SizedBox(height: 16),
                     Text(_error!,
                         key: const Key('authError'),
                         style: TextStyle(color: scheme.error)),
                   ],
-                  const SizedBox(height: 24),
+                  SizedBox(height: _isSignUp ? 24 : 12),
                   FilledButton(
                     key: const Key('submitButton'),
                     onPressed: _busy ? null : _submit,
@@ -123,6 +164,23 @@ class _LoginScreenState extends State<LoginScreen> {
                             child: CircularProgressIndicator(strokeWidth: 2.5),
                           )
                         : Text(title),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(children: [
+                    const Expanded(child: Divider()),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Text('หรือ',
+                          style: TextStyle(color: scheme.onSurfaceVariant)),
+                    ),
+                    const Expanded(child: Divider()),
+                  ]),
+                  const SizedBox(height: 16),
+                  OutlinedButton.icon(
+                    key: const Key('googleButton'),
+                    onPressed: _busy ? null : _googleSignIn,
+                    icon: const Icon(Icons.g_mobiledata, size: 28),
+                    label: const Text('ดำเนินการต่อด้วย Google'),
                   ),
                   const SizedBox(height: 8),
                   TextButton(
