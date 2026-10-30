@@ -56,13 +56,14 @@ class DefaultFirebaseOptions {
     projectId: 'food-log-kmitl',
     storageBucket: 'food-log-kmitl.firebasestorage.app',
   );
-
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyCFj4olDSiwdShXo6ib68fw0Oh8ji99zJs',
     appId: '1:523105800573:ios:9169e80cb458aeb0ecbc14',
     messagingSenderId: '523105800573',
     projectId: 'food-log-kmitl',
     storageBucket: 'food-log-kmitl.firebasestorage.app',
+    androidClientId: '523105800573-6uu5fcbuflrv2u3dnsr2rj8ecgc6a0pa.apps.googleusercontent.com',
+    iosClientId: '523105800573-iqikkjkpp9qs19v1bq24hl0osc6h9alh.apps.googleusercontent.com',
     iosBundleId: 'com.kmitl.foodLog',
   );
 }
