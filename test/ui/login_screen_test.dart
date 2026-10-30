@@ -12,7 +12,7 @@ void main() {
 
   /// ผ่านหน้า Welcome ไปหน้า Login
   Future<void> goToLogin(WidgetTester tester) async {
-    final start = find.byKey(const Key('welcomeStartButton'));
+    final start = find.byKey(const Key('welcomeLoginButton'));
     await tester.ensureVisible(start);
     await tester.tap(start);
     await tester.pumpAndSettle();
