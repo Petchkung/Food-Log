@@ -9,6 +9,8 @@ const excluded = [
   'lib/main.dart',
   'lib/services/firebase_auth_service.dart',
   'lib/services/firestore_sync_service.dart',
+  'lib/services/gemini_food_analyzer.dart',
+  'lib/app/app_check.dart',
 ];
 
 void main(List<String> args) {
