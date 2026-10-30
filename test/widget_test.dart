@@ -6,11 +6,14 @@ import 'helpers/fake_auth_service.dart';
 import 'helpers/fake_food_repository.dart';
 
 void main() {
-  testWidgets('ยังไม่ล็อกอิน → เห็นหน้าเข้าสู่ระบบ และใช้ Material 3', (tester) async {
+  testWidgets('ยังไม่ล็อกอิน → เห็นหน้า Welcome และใช้ Material 3', (
+    tester,
+  ) async {
     await tester.pumpWidget(
-        FoodLogApp(auth: FakeAuthService(), repository: FakeFoodRepository()));
+      FoodLogApp(auth: FakeAuthService(), repository: FakeFoodRepository()),
+    );
 
-    expect(find.byKey(const Key('emailField')), findsOneWidget);
+    expect(find.byKey(const Key('welcomeStartButton')), findsOneWidget);
     final app = tester.widget<MaterialApp>(find.byType(MaterialApp));
     expect(app.theme!.useMaterial3, isTrue);
   });

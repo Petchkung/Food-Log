@@ -10,10 +10,26 @@ void main() {
 
   setUp(() => auth = FakeAuthService());
 
-  Future<void> openApp(WidgetTester tester) => tester.pumpWidget(
-      FoodLogApp(auth: auth, repository: FakeFoodRepository()));
+  /// ผ่านหน้า Welcome ไปหน้า Login
+  Future<void> goToLogin(WidgetTester tester) async {
+    final start = find.byKey(const Key('welcomeLoginButton'));
+    await tester.ensureVisible(start);
+    await tester.tap(start);
+    await tester.pumpAndSettle();
+  }
 
-  Future<void> fillAndSubmit(WidgetTester tester, String email, String password) async {
+  Future<void> openApp(WidgetTester tester) async {
+    await tester.pumpWidget(
+      FoodLogApp(auth: auth, repository: FakeFoodRepository()),
+    );
+    await goToLogin(tester);
+  }
+
+  Future<void> fillAndSubmit(
+    WidgetTester tester,
+    String email,
+    String password,
+  ) async {
     await tester.enterText(find.byKey(const Key('emailField')), email);
     await tester.enterText(find.byKey(const Key('passwordField')), password);
     await tester.tap(find.byKey(const Key('submitButton')));
@@ -29,7 +45,9 @@ void main() {
     expect(find.text('กรุณากรอกรหัสผ่าน'), findsOneWidget);
   });
 
-  testWidgets('เข้าสู่ระบบสำเร็จ → ไปหน้าหลัก แล้วออกจากระบบได้', (tester) async {
+  testWidgets('เข้าสู่ระบบสำเร็จ → ไปหน้าหลัก แล้วออกจากระบบได้', (
+    tester,
+  ) async {
     await openApp(tester);
     await fillAndSubmit(tester, 'student@kmitl.ac.th', 'foodlog2026');
 
@@ -37,6 +55,8 @@ void main() {
 
     await tester.tap(find.byKey(const Key('signOutButton')));
     await tester.pumpAndSettle();
+    expect(find.byKey(const Key('welcomeStartButton')), findsOneWidget);
+    await goToLogin(tester);
     expect(find.byKey(const Key('emailField')), findsOneWidget);
   });
 

@@ -4,10 +4,20 @@ import '../../core/validators.dart';
 import '../../services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key, required this.auth});
+  const LoginScreen({
+    super.key,
+    required this.auth,
+    this.onBack,
+    this.initialSignUp = false,
+  });
 
   final AuthService auth;
 
+  /// ถ้ากำหนด จะแสดงปุ่มย้อนกลับ (ใช้กลับไปหน้า Welcome)
+  final VoidCallback? onBack;
+
+  /// true = เปิดหน้าในโหมดสมัครสมาชิก
+  final bool initialSignUp;
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
@@ -16,7 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _email = TextEditingController();
   final _password = TextEditingController();
-  bool _isSignUp = false;
+  late bool _isSignUp = widget.initialSignUp;
   bool _busy = false;
   bool _obscure = true;
   String? _error;
@@ -59,6 +69,18 @@ class _LoginScreenState extends State<LoginScreen> {
     final title = _isSignUp ? 'สมัครสมาชิก' : 'เข้าสู่ระบบ';
 
     return Scaffold(
+      appBar: widget.onBack == null
+          ? null
+          : AppBar(
+              backgroundColor: Colors.transparent,
+              scrolledUnderElevation: 0,
+              leading: IconButton(
+                key: const Key('loginBackButton'),
+                tooltip: 'ย้อนกลับ',
+                icon: const Icon(Icons.arrow_back),
+                onPressed: widget.onBack,
+              ),
+            ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -68,11 +90,19 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(title,
-                      style: text.headlineMedium?.copyWith(fontWeight: FontWeight.bold)),
+                  Text(
+                    title,
+                    style: text.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   const SizedBox(height: 4),
-                  Text('บันทึกอาหาร นับแคลอรี่ ด้วย AI',
-                      style: text.bodyLarge?.copyWith(color: scheme.onSurfaceVariant)),
+                  Text(
+                    'บันทึกอาหาร นับแคลอรี่ ด้วย AI',
+                    style: text.bodyLarge?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
                   const SizedBox(height: 32),
                   TextFormField(
                     key: const Key('emailField'),
@@ -95,22 +125,28 @@ class _LoginScreenState extends State<LoginScreen> {
                       prefixIcon: const Icon(Icons.lock_outline),
                       suffixIcon: IconButton(
                         tooltip: _obscure ? 'แสดงรหัสผ่าน' : 'ซ่อนรหัสผ่าน',
-                        icon: Icon(_obscure
-                            ? Icons.visibility_outlined
-                            : Icons.visibility_off_outlined),
+                        icon: Icon(
+                          _obscure
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
+                        ),
                         onPressed: () => setState(() => _obscure = !_obscure),
                       ),
                     ),
                     // สมัคร: ต้องรหัสผ่านแข็งแรง / เข้าสู่ระบบ: แค่ห้ามว่าง
                     validator: _isSignUp
                         ? Validators.password
-                        : (v) => (v == null || v.isEmpty) ? 'กรุณากรอกรหัสผ่าน' : null,
+                        : (v) => (v == null || v.isEmpty)
+                              ? 'กรุณากรอกรหัสผ่าน'
+                              : null,
                   ),
                   if (_error != null) ...[
                     const SizedBox(height: 16),
-                    Text(_error!,
-                        key: const Key('authError'),
-                        style: TextStyle(color: scheme.error)),
+                    Text(
+                      _error!,
+                      key: const Key('authError'),
+                      style: TextStyle(color: scheme.error),
+                    ),
                   ],
                   const SizedBox(height: 24),
                   FilledButton(
@@ -128,9 +164,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   TextButton(
                     key: const Key('toggleModeButton'),
                     onPressed: _busy ? null : _toggleMode,
-                    child: Text(_isSignUp
-                        ? 'มีบัญชีแล้ว? เข้าสู่ระบบ'
-                        : 'ยังไม่มีบัญชี? สมัครสมาชิก'),
+                    child: Text(
+                      _isSignUp
+                          ? 'มีบัญชีแล้ว? เข้าสู่ระบบ'
+                          : 'ยังไม่มีบัญชี? สมัครสมาชิก',
+                    ),
                   ),
                 ],
               ),
