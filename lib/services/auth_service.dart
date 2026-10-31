@@ -29,6 +29,12 @@ class AuthException implements Exception {
         return AuthException(code, 'พยายามหลายครั้งเกินไป กรุณารอสักครู่');
       case 'network-request-failed':
         return AuthException(code, 'เชื่อมต่ออินเทอร์เน็ตไม่ได้');
+      case 'web-context-canceled':
+      case 'web-context-cancelled':
+      case 'canceled':
+        return AuthException(code, 'ยกเลิกการเข้าสู่ระบบด้วย Google');
+      case 'account-exists-with-different-credential':
+        return AuthException(code, 'อีเมลนี้สมัครด้วยรหัสผ่านไว้แล้ว กรุณาเข้าสู่ระบบด้วยรหัสผ่าน');
       default:
         return AuthException(code, 'เกิดข้อผิดพลาด กรุณาลองใหม่');
     }
@@ -44,5 +50,7 @@ abstract class AuthService {
   AppUser? get currentUser;
   Future<AppUser> signIn({required String email, required String password});
   Future<AppUser> signUp({required String email, required String password});
+  Future<AppUser> signInWithGoogle();
+  Future<void> sendPasswordReset(String email);
   Future<void> signOut();
 }

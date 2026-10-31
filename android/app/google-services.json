@@ -12,7 +12,20 @@
           "package_name": "com.kmitl.food_log"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "523105800573-6uu5fcbuflrv2u3dnsr2rj8ecgc6a0pa.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.kmitl.food_log",
+            "certificate_hash": "349696fcabfc97d80b425bc1e01063034aeeafad"
+          }
+        },
+        {
+          "client_id": "523105800573-b9h0vgnumbdvhgt8q2jur6cmm52iuu6m.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAxt-5KYLWDNzkJHp8DLezdq5zMzhjEkpw"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "523105800573-b9h0vgnumbdvhgt8q2jur6cmm52iuu6m.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "523105800573-iqikkjkpp9qs19v1bq24hl0osc6h9alh.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.kmitl.foodLog"
+              }
+            }
+          ]
         }
       }
     }

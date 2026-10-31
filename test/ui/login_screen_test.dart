@@ -10,9 +10,20 @@ void main() {
 
   setUp(() => auth = FakeAuthService());
 
-  Future<void> openApp(WidgetTester tester) => tester.pumpWidget(
-    FoodLogApp(auth: auth, repository: FakeFoodRepository()),
-  );
+  /// ผ่านหน้า Welcome ไปหน้า Login
+  Future<void> goToLogin(WidgetTester tester) async {
+    final start = find.byKey(const Key('welcomeLoginButton'));
+    await tester.ensureVisible(start);
+    await tester.tap(start);
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> openApp(WidgetTester tester) async {
+    await tester.pumpWidget(
+      FoodLogApp(auth: auth, repository: FakeFoodRepository()),
+    );
+    await goToLogin(tester);
+  }
 
   Future<void> fillAndSubmit(
     WidgetTester tester,
@@ -41,8 +52,11 @@ void main() {
     await fillAndSubmit(tester, 'student@kmitl.ac.th', 'foodlog2026');
 
     expect(find.text('สวัสดี, student'), findsOneWidget);
+
     await tester.tap(find.byKey(const Key('signOutButton')));
     await tester.pumpAndSettle();
+    expect(find.byKey(const Key('welcomeStartButton')), findsOneWidget);
+    await goToLogin(tester);
     expect(find.byKey(const Key('emailField')), findsOneWidget);
   });
 
