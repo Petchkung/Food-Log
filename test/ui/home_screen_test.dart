@@ -14,7 +14,10 @@ void main() {
   setUp(() async {
     auth = FakeAuthService();
     repo = FakeFoodRepository();
-    await auth.signIn(email: 'min@test.com', password: 'foodlog2026'); // ล็อกอินไว้ก่อน
+    await auth.signIn(
+      email: 'min@test.com',
+      password: 'foodlog2026',
+    ); // ล็อกอินไว้ก่อน
   });
 
   Future<void> openApp(WidgetTester tester) async {
@@ -22,29 +25,43 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('ยังไม่มีรายการ → แสดงข้อความว่าง และ 0 / 2000 kcal', (tester) async {
+  /// ตัวเลขแคลอรี่รวมกลางวงแหวน เช่น "520"
+  String totalText(WidgetTester tester) =>
+      tester.widget<Text>(find.byKey(const Key('calorieTotal'))).data!;
+
+  testWidgets('ยังไม่มีรายการ → แสดงข้อความว่าง และ 0 จาก 2,000 kcal', (
+    tester,
+  ) async {
     await openApp(tester);
     expect(find.byKey(const Key('emptyState')), findsOneWidget);
-    expect(find.text('0 / 2000 kcal'), findsOneWidget);
+    expect(totalText(tester), '0'); // ปรับ
+    expect(find.text('จาก 2,000 kcal'), findsOneWidget); // ปรับ
   });
 
-  testWidgets('เพิ่มอาหารผ่านกล่องเพิ่มอาหาร → เห็นในรายการ และยอดรวมอัปเดต', (tester) async {
+  testWidgets('เพิ่มอาหารผ่านกล่องเพิ่มอาหาร → เห็นในรายการ และยอดรวมอัปเดต', (
+    tester,
+  ) async {
     await openApp(tester);
 
     await tester.tap(find.byKey(const Key('addFoodButton')));
     await tester.pumpAndSettle();
-    await tester.enterText(find.byKey(const Key('foodNameField')), 'ข้าวมันไก่');
+    await tester.enterText(
+      find.byKey(const Key('foodNameField')),
+      'ข้าวมันไก่',
+    );
     await tester.enterText(find.byKey(const Key('caloriesField')), '520');
     await tester.tap(find.text('มื้อกลางวัน'));
     await tester.tap(find.byKey(const Key('saveFoodButton')));
     await tester.pumpAndSettle();
 
     expect(find.text('ข้าวมันไก่'), findsOneWidget);
-    expect(find.text('520 / 2000 kcal'), findsOneWidget);
+    expect(totalText(tester), '520'); // ปรับ
     expect(repo.items.single.mealType, MealType.lunch);
   });
 
-  testWidgets('กล่องเพิ่มอาหาร: ไม่กรอก → แจ้งเตือน และไม่บันทึก', (tester) async {
+  testWidgets('กล่องเพิ่มอาหาร: ไม่กรอก → แจ้งเตือน และไม่บันทึก', (
+    tester,
+  ) async {
     await openApp(tester);
 
     await tester.tap(find.byKey(const Key('addFoodButton')));
@@ -59,14 +76,16 @@ void main() {
   });
 
   testWidgets('กดลบ → รายการหายไป', (tester) async {
-    repo.items.add(FoodEntry(
-      id: 'e1',
-      userId: 'test-uid',
-      name: 'ส้มตำ',
-      calories: 120,
-      mealType: MealType.lunch,
-      eatenAt: DateTime.now(),
-    ));
+    repo.items.add(
+      FoodEntry(
+        id: 'e1',
+        userId: 'test-uid',
+        name: 'ส้มตำ',
+        calories: 120,
+        mealType: MealType.lunch,
+        eatenAt: DateTime.now(),
+      ),
+    );
     await openApp(tester);
     expect(find.text('ส้มตำ'), findsOneWidget);
 

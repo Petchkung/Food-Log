@@ -51,7 +51,7 @@ void main() {
     await openApp(tester);
     await fillAndSubmit(tester, 'student@kmitl.ac.th', 'foodlog2026');
 
-    expect(find.text('สวัสดี student@kmitl.ac.th'), findsOneWidget);
+    expect(find.text('สวัสดี, student'), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('signOutButton')));
     await tester.pumpAndSettle();
