@@ -34,4 +34,19 @@ void main() {
       expect(ThaiFormat.initial('  '), '?');
     });
   });
+
+  group('ThaiFormat.number', () {
+    test('ใส่คอมมาหลักพัน', () {
+      expect(ThaiFormat.number(0), '0');
+      expect(ThaiFormat.number(999), '999');
+      expect(ThaiFormat.number(1240), '1,240');
+      expect(ThaiFormat.number(12345), '12,345');
+      expect(ThaiFormat.number(1234567), '1,234,567');
+    });
+
+    test('ปัดทศนิยมและรองรับค่าติดลบ', () {
+      expect(ThaiFormat.number(1239.6), '1,240');
+      expect(ThaiFormat.number(-1500), '-1,500');
+    });
+  });
 }

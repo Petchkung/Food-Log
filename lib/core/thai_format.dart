@@ -43,4 +43,16 @@ class ThaiFormat {
     if (t.isEmpty) return '?';
     return String.fromCharCode(t.runes.first).toUpperCase();
   }
+
+  /// ปัดเป็นจำนวนเต็มและใส่คอมมาหลักพัน เช่น 1240 → "1,240"
+  static String number(num value) {
+    final rounded = value.round();
+    final digits = rounded.abs().toString();
+    final buffer = StringBuffer();
+    for (var i = 0; i < digits.length; i++) {
+      if (i > 0 && (digits.length - i) % 3 == 0) buffer.write(',');
+      buffer.write(digits[i]);
+    }
+    return rounded < 0 ? '-$buffer' : buffer.toString();
+  }
 }
