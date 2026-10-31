@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/thai_format.dart';
 import '../../models/food_entry.dart';
 import '../../models/meal_type.dart';
 import '../../services/auth_service.dart';
 import '../../state/food_log_controller.dart';
+import '../widgets/home_header.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key, required this.user, required this.auth});
@@ -13,12 +15,18 @@ class HomeScreen extends StatelessWidget {
   final AuthService auth;
 
   Future<void> _openAdd(BuildContext context, FoodLogController c) async {
-    final result = await showDialog<({String name, double calories, MealType meal})>(
-      context: context,
-      builder: (_) => AddFoodDialog(initialMeal: MealType.suggestFor(c.now())),
-    );
+    final result =
+        await showDialog<({String name, double calories, MealType meal})>(
+          context: context,
+          builder: (_) =>
+              AddFoodDialog(initialMeal: MealType.suggestFor(c.now())),
+        );
     if (result == null) return;
-    await c.addEntry(name: result.name, calories: result.calories, mealType: result.meal);
+    await c.addEntry(
+      name: result.name,
+      calories: result.calories,
+      mealType: result.meal,
+    );
   }
 
   @override
@@ -31,79 +39,81 @@ class HomeScreen extends StatelessWidget {
     if (msg != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(msg)));
         }
       });
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('สวัสดี ${user.email}'),
-        actions: [
-          IconButton(
-            key: const Key('syncButton'),
-            tooltip: 'ซิงก์ข้อมูล',
-            onPressed: c.syncing ? null : () => c.sync(),
-            icon: Badge(
-              isLabelVisible: c.pendingCount > 0,
-              label: Text('${c.pendingCount}'),
-              child: const Icon(Icons.cloud_sync_outlined),
-            ),
-          ),
-          IconButton(
-            key: const Key('signOutButton'),
-            tooltip: 'ออกจากระบบ',
-            icon: const Icon(Icons.logout),
-            onPressed: auth.signOut,
-          ),
-        ],
+      body: SafeArea(
+        bottom: false,
+        child: c.loading
+            ? const Center(child: CircularProgressIndicator())
+            : ListView(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
+                children: [
+                  HomeHeader(
+                    day: c.selectedDay,
+                    name: ThaiFormat.nameFromEmail(user.email),
+                    syncing: c.syncing,
+                    pendingCount: c.pendingCount,
+                    onSync: () => c.sync(),
+                    onSignOut: auth.signOut,
+                  ),
+                  const SizedBox(height: 16),
+                  Card(
+                    margin: EdgeInsets.zero,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${s.calories.round()} / ${s.goal.round()} kcal',
+                            key: const Key('calorieTotal'),
+                            style: text.headlineSmall,
+                          ),
+                          const SizedBox(height: 8),
+                          LinearProgressIndicator(value: s.progress),
+                          const SizedBox(height: 8),
+                          Text(
+                            s.isOverGoal
+                                ? 'เกินเป้า ${(-s.remaining).round()} kcal'
+                                : 'เหลืออีก ${s.remaining.round()} kcal',
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  if (c.entries.isEmpty)
+                    const Padding(
+                      key: Key('emptyState'),
+                      padding: EdgeInsets.all(32),
+                      child: Text(
+                        'ยังไม่มีรายการวันนี้ กด + เพื่อเพิ่มอาหาร',
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  for (final FoodEntry e in c.entries)
+                    ListTile(
+                      key: ValueKey(e.id),
+                      leading: Icon(e.mealType.icon),
+                      title: Text(e.name),
+                      subtitle: Text(
+                        '${e.mealType.label} · ${e.calories.round()} kcal',
+                      ),
+                      trailing: IconButton(
+                        tooltip: 'ลบ',
+                        icon: const Icon(Icons.delete_outline),
+                        onPressed: () => c.deleteEntry(e),
+                      ),
+                    ),
+                ],
+              ),
       ),
-      body: c.loading
-          ? const Center(child: CircularProgressIndicator())
-          : ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                Card(
-                  margin: EdgeInsets.zero,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('${s.calories.round()} / ${s.goal.round()} kcal',
-                            key: const Key('calorieTotal'), style: text.headlineSmall),
-                        const SizedBox(height: 8),
-                        LinearProgressIndicator(value: s.progress),
-                        const SizedBox(height: 8),
-                        Text(s.isOverGoal
-                            ? 'เกินเป้า ${(-s.remaining).round()} kcal'
-                            : 'เหลืออีก ${s.remaining.round()} kcal'),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                if (c.entries.isEmpty)
-                  const Padding(
-                    key: Key('emptyState'),
-                    padding: EdgeInsets.all(32),
-                    child: Text('ยังไม่มีรายการวันนี้ กด + เพื่อเพิ่มอาหาร',
-                        textAlign: TextAlign.center),
-                  ),
-                for (final FoodEntry e in c.entries)
-                  ListTile(
-                    key: ValueKey(e.id),
-                    leading: Icon(e.mealType.icon),
-                    title: Text(e.name),
-                    subtitle: Text('${e.mealType.label} · ${e.calories.round()} kcal'),
-                    trailing: IconButton(
-                      tooltip: 'ลบ',
-                      icon: const Icon(Icons.delete_outline),
-                      onPressed: () => c.deleteEntry(e),
-                    ),
-                  ),
-              ],
-            ),
       floatingActionButton: FloatingActionButton.extended(
         key: const Key('addFoodButton'),
         onPressed: () => _openAdd(context, c),
