@@ -6,6 +6,7 @@ import '../../models/food_entry.dart';
 import '../../models/meal_type.dart';
 import '../../services/auth_service.dart';
 import '../../state/food_log_controller.dart';
+import '../widgets/calorie_ring_card.dart';
 import '../widgets/home_header.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -32,8 +33,6 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.watch<FoodLogController>();
-    final s = c.summary;
-    final text = Theme.of(context).textTheme;
 
     final msg = c.consumeMessage();
     if (msg != null) {
@@ -63,30 +62,7 @@ class HomeScreen extends StatelessWidget {
                     onSignOut: auth.signOut,
                   ),
                   const SizedBox(height: 16),
-                  Card(
-                    margin: EdgeInsets.zero,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '${s.calories.round()} / ${s.goal.round()} kcal',
-                            key: const Key('calorieTotal'),
-                            style: text.headlineSmall,
-                          ),
-                          const SizedBox(height: 8),
-                          LinearProgressIndicator(value: s.progress),
-                          const SizedBox(height: 8),
-                          Text(
-                            s.isOverGoal
-                                ? 'เกินเป้า ${(-s.remaining).round()} kcal'
-                                : 'เหลืออีก ${s.remaining.round()} kcal',
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                  CalorieRingCard(summary: c.summary, isToday: c.isToday),
                   const SizedBox(height: 8),
                   if (c.entries.isEmpty)
                     const Padding(

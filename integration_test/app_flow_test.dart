@@ -21,7 +21,9 @@ void main() {
 
   setUp(() async {
     dbName = 'integration_${DateTime.now().millisecondsSinceEpoch}.db';
-    local = await LocalDatabase.open(path: dbName); // SQLite จริงบนเครื่อง (ไฟล์แยก ไม่ปนข้อมูลจริง)
+    local = await LocalDatabase.open(
+      path: dbName,
+    ); // SQLite จริงบนเครื่อง (ไฟล์แยก ไม่ปนข้อมูลจริง)
     cloud = FakeCloudSync();
     auth = FakeAuthService();
   });
@@ -41,58 +43,80 @@ void main() {
   }
 
   Future<void> login(WidgetTester tester) async {
+    // ผ่านหน้า Welcome ก่อน
+    final start = find.byKey(const Key('welcomeLoginButton'));
+    await tester.ensureVisible(start);
+    await tester.tap(start);
+    await tester.pumpAndSettle();
+
     await tester.enterText(find.byKey(const Key('emailField')), 'min@test.com');
-    await tester.enterText(find.byKey(const Key('passwordField')), 'foodlog2026');
+    await tester.enterText(
+      find.byKey(const Key('passwordField')),
+      'foodlog2026',
+    );
     await tester.tap(find.byKey(const Key('submitButton')));
     await tester.pumpAndSettle();
   }
 
-  testWidgets('ล็อกอิน → เพิ่มอาหาร → ออฟไลน์แล้วซิงก์ → ลบ → ออก/เข้าใหม่ ข้อมูลยังอยู่',
-      (tester) async {
-    await tester.pumpWidget(FoodLogApp(
-      auth: auth,
-      repository: FoodRepository(local: local, cloud: cloud),
-    ));
-    await tester.pumpAndSettle();
+  /// ตัวเลขแคลอรี่รวมกลางวงแหวน เช่น "700"
+  String total(WidgetTester tester) =>
+      tester.widget<Text>(find.byKey(const Key('calorieTotal'))).data!;
 
-    // 1) ล็อกอิน → หน้าหลักว่าง
-    await login(tester);
-    expect(find.text('สวัสดี min@test.com'), findsOneWidget);
-    expect(find.byKey(const Key('emptyState')), findsOneWidget);
+  testWidgets(
+    'ล็อกอิน → เพิ่มอาหาร → ออฟไลน์แล้วซิงก์ → ลบ → ออก/เข้าใหม่ ข้อมูลยังอยู่',
+    (tester) async {
+      await tester.pumpWidget(
+        FoodLogApp(
+          auth: auth,
+          repository: FoodRepository(local: local, cloud: cloud),
+        ),
+      );
+      await tester.pumpAndSettle();
 
-    // 2) เพิ่มอาหาร 2 รายการ → ยอดรวมถูก และขึ้น cloud
-    await addFood(tester, 'ข้าวมันไก่', '520');
-    await addFood(tester, 'ชาเย็น', '180');
-    expect(find.text('700 / 2000 kcal'), findsOneWidget);
-    expect(cloud.store['test-uid'], hasLength(2));
+      // 1) ล็อกอิน → หน้าหลักว่าง
+      await login(tester);
+      expect(find.text('สวัสดี, min'), findsOneWidget);
+      expect(find.byKey(const Key('emptyState')), findsOneWidget);
 
-    // 3) เน็ตหลุด → ยังบันทึกได้ในเครื่อง แล้วซิงก์ทีหลัง
-    cloud.offline = true;
-    await addFood(tester, 'ส้มตำ', '120');
-    expect(find.text('820 / 2000 kcal'), findsOneWidget);
-    expect(cloud.store['test-uid'], hasLength(2)); // ยังไม่ขึ้น cloud
+      // 2) เพิ่มอาหาร 2 รายการ → ยอดรวมถูก และขึ้น cloud
+      await addFood(tester, 'ข้าวมันไก่', '520');
+      await addFood(tester, 'ชาเย็น', '180');
+      expect(total(tester), '700');
+      expect(cloud.store['test-uid'], hasLength(2));
 
-    cloud.offline = false;
-    await tester.tap(find.byKey(const Key('syncButton')));
-    await tester.pumpAndSettle();
-    expect(cloud.store['test-uid'], hasLength(3)); // ซิงก์แล้ว
+      // 3) เน็ตหลุด → ยังบันทึกได้ในเครื่อง แล้วซิงก์ทีหลัง
+      cloud.offline = true;
+      await addFood(tester, 'ส้มตำ', '120');
+      expect(total(tester), '820');
+      expect(cloud.store['test-uid'], hasLength(2)); // ยังไม่ขึ้น cloud
 
-    // 4) ลบชาเย็น → ยอดลด และลบบน cloud ด้วย
-    final teaTile = find.ancestor(of: find.text('ชาเย็น'), matching: find.byType(ListTile));
-    await tester.tap(find.descendant(of: teaTile, matching: find.byTooltip('ลบ')));
-    await tester.pumpAndSettle();
-    expect(find.text('ชาเย็น'), findsNothing);
-    expect(find.text('640 / 2000 kcal'), findsOneWidget);
-    expect(cloud.store['test-uid'], hasLength(2));
+      cloud.offline = false;
+      await tester.tap(find.byKey(const Key('syncButton')));
+      await tester.pumpAndSettle();
+      expect(cloud.store['test-uid'], hasLength(3)); // ซิงก์แล้ว
 
-    // 5) ออกจากระบบ แล้วเข้าใหม่ → ข้อมูลยังอยู่ (อ่านจาก SQLite)
-    await tester.tap(find.byKey(const Key('signOutButton')));
-    await tester.pumpAndSettle();
-    expect(find.byKey(const Key('emailField')), findsOneWidget);
+      // 4) ลบชาเย็น → ยอดลด และลบบน cloud ด้วย
+      final teaTile = find.ancestor(
+        of: find.text('ชาเย็น'),
+        matching: find.byType(ListTile),
+      );
+      await tester.tap(
+        find.descendant(of: teaTile, matching: find.byTooltip('ลบ')),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('ชาเย็น'), findsNothing);
+      expect(total(tester), '640');
+      expect(cloud.store['test-uid'], hasLength(2));
 
-    await login(tester);
-    expect(find.text('ข้าวมันไก่'), findsOneWidget);
-    expect(find.text('ส้มตำ'), findsOneWidget);
-    expect(find.text('640 / 2000 kcal'), findsOneWidget);
-  });
+      // 5) ออกจากระบบ แล้วเข้าใหม่ → ข้อมูลยังอยู่ (อ่านจาก SQLite)
+      await tester.tap(find.byKey(const Key('signOutButton')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('welcomeStartButton')), findsOneWidget);
+
+      await login(tester);
+      expect(find.text('ข้าวมันไก่'), findsOneWidget);
+      expect(find.text('ส้มตำ'), findsOneWidget);
+      expect(total(tester), '640');
+    },
+  );
 }
