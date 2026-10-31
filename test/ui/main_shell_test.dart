@@ -57,6 +57,17 @@ void main() {
     expect(find.byKey(const Key('calorieTotal')), findsOneWidget);
   });
 
+  testWidgets('กด "ดูสถิติ" ในหน้าหลัก → ไปแท็บสถิติ', (tester) async {
+    await openApp(tester);
+
+    final link = find.byKey(const Key('openStatsButton'));
+    await tester.ensureVisible(link);
+    await tester.tap(link);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('statsTab')), findsOneWidget);
+  });
+
   testWidgets('มีปุ่มสแกนตรงกลาง และกดได้โดยไม่พัง', (tester) async {
     await openApp(tester);
 

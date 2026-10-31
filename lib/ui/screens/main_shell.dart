@@ -26,7 +26,11 @@ class _MainShellState extends State<MainShell> {
       body: IndexedStack(
         index: _index,
         children: [
-          HomeScreen(user: widget.user, auth: widget.auth),
+          HomeScreen(
+            user: widget.user,
+            auth: widget.auth,
+            onOpenStats: () => setState(() => _index = 2), // ปุ่ม "ดูสถิติ"
+          ),
           const _PlaceholderTab(key: Key('logTab'), title: 'บันทึก'),
           const _PlaceholderTab(key: Key('statsTab'), title: 'สถิติ'),
           const _PlaceholderTab(key: Key('profileTab'), title: 'โปรไฟล์'),

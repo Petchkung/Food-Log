@@ -34,7 +34,7 @@ void main() {
   });
 
   Future<void> addFood(WidgetTester tester, String name, String kcal) async {
-    await tester.tap(find.byKey(const Key('addFoodButton')));
+    await tester.tap(find.byKey(const Key('addMeal_lunch')));
     await tester.pumpAndSettle();
     await tester.enterText(find.byKey(const Key('foodNameField')), name);
     await tester.enterText(find.byKey(const Key('caloriesField')), kcal);
