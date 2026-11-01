@@ -108,8 +108,12 @@ void main() {
       expect(total(tester), '640');
       expect(cloud.store['test-uid'], hasLength(2));
 
-      // 5) ออกจากระบบ แล้วเข้าใหม่ → ข้อมูลยังอยู่ (อ่านจาก SQLite)
-      await tester.tap(find.byKey(const Key('signOutButton')));
+      // 5) ออกจากระบบ (แท็บโปรไฟล์) แล้วเข้าใหม่ → ข้อมูลยังอยู่ (อ่านจาก SQLite)
+      await tester.tap(find.byKey(const Key('navProfile')));
+      await tester.pumpAndSettle();
+      final signOut = find.byKey(const Key('profileSignOutButton'));
+      await tester.ensureVisible(signOut);
+      await tester.tap(signOut);
       await tester.pumpAndSettle();
       expect(find.byKey(const Key('welcomeStartButton')), findsOneWidget);
 
