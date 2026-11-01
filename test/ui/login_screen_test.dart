@@ -53,8 +53,14 @@ void main() {
 
     expect(find.text('สวัสดี, student'), findsOneWidget);
 
-    await tester.tap(find.byKey(const Key('signOutButton')));
+    // ออกจากระบบอยู่ที่แท็บโปรไฟล์
+    await tester.tap(find.byKey(const Key('navProfile')));
     await tester.pumpAndSettle();
+    final signOut = find.byKey(const Key('profileSignOutButton'));
+    await tester.ensureVisible(signOut);
+    await tester.tap(signOut);
+    await tester.pumpAndSettle();
+
     expect(find.byKey(const Key('welcomeStartButton')), findsOneWidget);
     await goToLogin(tester);
     expect(find.byKey(const Key('emailField')), findsOneWidget);

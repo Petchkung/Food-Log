@@ -11,7 +11,7 @@ class HomeHeader extends StatelessWidget {
     required this.syncing,
     required this.pendingCount,
     required this.onSync,
-    required this.onSignOut,
+    this.onSignOut,
     this.onPreviousDay,
     this.onNextDay,
   });
@@ -22,8 +22,8 @@ class HomeHeader extends StatelessWidget {
   final int pendingCount;
   final VoidCallback onSync;
 
-  /// ชั่วคราว: จะย้ายไปหน้าโปรไฟล์ใน feature/profile-screen
-  final VoidCallback onSignOut;
+  /// ถ้าไม่ส่ง จะไม่แสดงปุ่มออกจากระบบ (ตอนนี้ปุ่มนี้อยู่ในหน้าโปรไฟล์)
+  final VoidCallback? onSignOut;
 
   /// ถ้าไม่ส่ง onPreviousDay จะไม่แสดงลูกศร / onNextDay เป็น null = กดวันถัดไปไม่ได้
   final VoidCallback? onPreviousDay;
@@ -83,7 +83,7 @@ class HomeHeader extends StatelessWidget {
               ),
           ],
         ),
-        // แถวล่าง: คำทักทาย + ชิปซิงก์ + อวาตาร์ + ออกจากระบบ
+        // แถวล่าง: คำทักทาย + ชิปซิงก์ + อวาตาร์ (+ ออกจากระบบ ถ้ามี)
         Row(
           children: [
             Expanded(
@@ -122,12 +122,13 @@ class HomeHeader extends StatelessWidget {
               foregroundColor: scheme.onPrimary,
               child: Text(ThaiFormat.initial(name)),
             ),
-            IconButton(
-              key: const Key('signOutButton'),
-              tooltip: 'ออกจากระบบ',
-              icon: const Icon(Icons.logout),
-              onPressed: onSignOut,
-            ),
+            if (onSignOut != null)
+              IconButton(
+                key: const Key('signOutButton'),
+                tooltip: 'ออกจากระบบ',
+                icon: const Icon(Icons.logout),
+                onPressed: onSignOut,
+              ),
           ],
         ),
       ],

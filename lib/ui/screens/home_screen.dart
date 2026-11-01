@@ -74,7 +74,6 @@ class HomeScreen extends StatelessWidget {
                     syncing: c.syncing,
                     pendingCount: c.pendingCount,
                     onSync: () => c.sync(),
-                    onSignOut: auth.signOut,
                     onPreviousDay: c.previousDay,
                     onNextDay: c.isToday ? null : c.nextDay,
                   ),
