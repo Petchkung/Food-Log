@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../services/auth_service.dart';
 import 'home_screen.dart';
+import 'profile_screen.dart';
 
 /// โครงหลักหลังล็อกอิน: เมนูล่าง 4 แท็บ + ปุ่มสแกนตรงกลาง
 class MainShell extends StatefulWidget {
@@ -33,13 +34,17 @@ class _MainShellState extends State<MainShell> {
           ),
           const _PlaceholderTab(key: Key('logTab'), title: 'บันทึก'),
           const _PlaceholderTab(key: Key('statsTab'), title: 'สถิติ'),
-          const _PlaceholderTab(key: Key('profileTab'), title: 'โปรไฟล์'),
+          ProfileScreen(
+            key: const Key('profileTab'),
+            user: widget.user,
+            auth: widget.auth,
+          ),
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
         key: const Key('scanButton'),
-        heroTag: null, // กันชนกับปุ่ม + ในหน้า Home ที่มี FAB อยู่แล้ว
+        heroTag: null,
         tooltip: 'สแกนอาหาร',
         backgroundColor: scheme.primary,
         foregroundColor: scheme.onPrimary,
