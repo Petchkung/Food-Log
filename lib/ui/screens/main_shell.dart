@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../services/auth_service.dart';
+import '../../state/food_log_controller.dart';
+import 'add_food_screen.dart';
 import 'home_screen.dart';
+import 'scanner_screen.dart';
 
 /// โครงหลักหลังล็อกอิน: เมนูล่าง 4 แท็บ + ปุ่มสแกนตรงกลาง
 class MainShell extends StatefulWidget {
@@ -27,7 +31,7 @@ class _MainShellState extends State<MainShell> {
         index: _index,
         children: [
           HomeScreen(user: widget.user, auth: widget.auth),
-          const _PlaceholderTab(key: Key('logTab'), title: 'บันทึก'),
+          const AddFoodScreen(key: Key('logTab')),
           const _PlaceholderTab(key: Key('statsTab'), title: 'สถิติ'),
           const _PlaceholderTab(key: Key('profileTab'), title: 'โปรไฟล์'),
         ],
@@ -41,7 +45,16 @@ class _MainShellState extends State<MainShell> {
         foregroundColor: scheme.onPrimary,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         onPressed: () {
-          // TODO(เค้ก): ต่อหน้าสแกนอาหาร (feature/ai-scan)
+          // หน้าที่ push อยู่เหนือ Provider จึงส่ง controller ต่อให้
+          final controller = context.read<FoodLogController>();
+          Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => ChangeNotifierProvider<FoodLogController>.value(
+                value: controller,
+                child: const ScannerScreen(),
+              ),
+            ),
+          );
         },
         child: const Icon(Icons.center_focus_strong_outlined),
       ),

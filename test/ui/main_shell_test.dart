@@ -4,6 +4,8 @@ import 'package:food_log/app/app.dart';
 
 import '../helpers/fake_auth_service.dart';
 import '../helpers/fake_food_repository.dart';
+import '../helpers/fake_ai_food_analyzer.dart';
+import '../helpers/fake_food_api_service.dart';
 
 void main() {
   late FakeAuthService auth;
@@ -16,13 +18,18 @@ void main() {
     ); // ล็อกอินไว้ก่อน
   });
 
-  Future<void> openApp(WidgetTester tester) async {
+   Future<void> openApp(WidgetTester tester) async {
     await tester.pumpWidget(
-      FoodLogApp(auth: auth, repository: FakeFoodRepository()),
+      FoodLogApp(
+        auth: auth,
+        repository: FakeFoodRepository(),
+        foodApi: FakeFoodApiService(),
+        aiAnalyzer: FakeAiFoodAnalyzer(),
+      ),
     );
     await tester.pumpAndSettle();
   }
-
+  
   Future<void> tapTab(WidgetTester tester, String key) async {
     await tester.tap(find.byKey(Key(key)));
     await tester.pumpAndSettle();

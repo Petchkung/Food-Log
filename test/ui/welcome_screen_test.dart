@@ -2,12 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:food_log/app/app.dart';
 
+import '../helpers/fake_ai_food_analyzer.dart';
 import '../helpers/fake_auth_service.dart';
+import '../helpers/fake_food_api_service.dart';
 import '../helpers/fake_food_repository.dart';
 
 void main() {
   Future<void> openApp(WidgetTester tester) => tester.pumpWidget(
-    FoodLogApp(auth: FakeAuthService(), repository: FakeFoodRepository()),
+    FoodLogApp(
+      auth: FakeAuthService(),
+      repository: FakeFoodRepository(),
+      foodApi: FakeFoodApiService(),
+      aiAnalyzer: FakeAiFoodAnalyzer(),
+    ),
   );
 
   Future<void> tapKey(WidgetTester tester, String key) async {

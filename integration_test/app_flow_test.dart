@@ -8,6 +8,8 @@ import 'package:sqflite/sqflite.dart';
 
 import '../test/helpers/fake_auth_service.dart';
 import '../test/helpers/fake_cloud_sync.dart';
+import '../test/helpers/fake_ai_food_analyzer.dart';
+import '../test/helpers/fake_food_api_service.dart';
 
 /// เทสต์ทั้ง flow บนมือถือจริง: UI จริง + SQLite จริง (Auth และ Cloud เป็นของปลอม)
 /// รัน: flutter test integration_test
@@ -69,6 +71,8 @@ void main() {
         FoodLogApp(
           auth: auth,
           repository: FoodRepository(local: local, cloud: cloud),
+          foodApi: FakeFoodApiService(),
+          aiAnalyzer: FakeAiFoodAnalyzer(),
         ),
       );
       await tester.pumpAndSettle();
