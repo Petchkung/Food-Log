@@ -75,6 +75,8 @@ class HomeScreen extends StatelessWidget {
                     pendingCount: c.pendingCount,
                     onSync: () => c.sync(),
                     onSignOut: auth.signOut,
+                    onPreviousDay: c.previousDay,
+                    onNextDay: c.isToday ? null : c.nextDay,
                   ),
                   const SizedBox(height: 16),
                   CalorieRingCard(summary: s, isToday: c.isToday),
