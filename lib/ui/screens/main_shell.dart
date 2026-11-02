@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
 import 'home_screen.dart';
 import 'profile_screen.dart';
+import 'stats_screen.dart';
 
 /// โครงหลักหลังล็อกอิน: เมนูล่าง 4 แท็บ + ปุ่มสแกนตรงกลาง
 class MainShell extends StatefulWidget {
@@ -33,7 +34,7 @@ class _MainShellState extends State<MainShell> {
             onOpenStats: () => setState(() => _index = 2), // ปุ่ม "ดูสถิติ"
           ),
           const _PlaceholderTab(key: Key('logTab'), title: 'บันทึก'),
-          const _PlaceholderTab(key: Key('statsTab'), title: 'สถิติ'),
+          const StatsScreen(key: Key('statsTab')),
           ProfileScreen(
             key: const Key('profileTab'),
             user: widget.user,
@@ -88,7 +89,7 @@ class _MainShellState extends State<MainShell> {
   }
 }
 
-/// หน้าชั่วคราวของแท็บที่ยังไม่ได้ทำ (จะถูกแทนใน branch ถัด ๆ ไป)
+/// หน้าชั่วคราวของแท็บที่ยังไม่ได้ทำ (แท็บบันทึก เป็นงานของเค้ก)
 class _PlaceholderTab extends StatelessWidget {
   const _PlaceholderTab({super.key, required this.title});
 
