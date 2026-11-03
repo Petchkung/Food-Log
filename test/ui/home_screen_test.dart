@@ -4,10 +4,10 @@ import 'package:food_log/app/app.dart';
 import 'package:food_log/models/food_entry.dart';
 import 'package:food_log/models/meal_type.dart';
 
-import '../helpers/fake_auth_service.dart';
-import '../helpers/fake_food_repository.dart';
 import '../helpers/fake_ai_food_analyzer.dart';
+import '../helpers/fake_auth_service.dart';
 import '../helpers/fake_food_api_service.dart';
+import '../helpers/fake_food_repository.dart';
 
 void main() {
   late FakeAuthService auth;
@@ -22,7 +22,12 @@ void main() {
     ); // ล็อกอินไว้ก่อน
   });
 
-    Future<void> openApp(WidgetTester tester) async {
+  Future<void> openApp(WidgetTester tester) async {
+    // จอสูง ให้เห็นการ์ดทั้ง 4 มื้อโดยไม่ต้องเลื่อน
+    tester.view.physicalSize = const Size(500, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
     await tester.pumpWidget(
       FoodLogApp(
         auth: auth,
@@ -38,43 +43,101 @@ void main() {
   String totalText(WidgetTester tester) =>
       tester.widget<Text>(find.byKey(const Key('calorieTotal'))).data!;
 
-  testWidgets('ยังไม่มีรายการ → แสดงข้อความว่าง และ 0 จาก 2,000 kcal', (
-    tester,
-  ) async {
-    await openApp(tester);
-    expect(find.byKey(const Key('emptyState')), findsOneWidget);
-    expect(totalText(tester), '0'); // ปรับ
-    expect(find.text('จาก 2,000 kcal'), findsOneWidget); // ปรับ
-  });
+  /// ข้อความหัวการ์ดมื้อ เช่น "มื้อกลางวัน · 520 kcal"
+  String mealTitle(WidgetTester tester, MealType meal) => tester
+      .widget<Text>(find.byKey(Key('mealTitle_${meal.name}')))
+      .textSpan!
+      .toPlainText();
 
-  testWidgets('เพิ่มอาหารผ่านกล่องเพิ่มอาหาร → เห็นในรายการ และยอดรวมอัปเดต', (
-    tester,
-  ) async {
-    await openApp(tester);
-
-    await tester.tap(find.byKey(const Key('addFoodButton')));
+  /// กด + ที่การ์ดมื้อ → หน้าเพิ่มอาหาร → "สร้างอาหารเอง"
+  Future<void> openManualForm(WidgetTester tester, MealType meal) async {
+    await tester.tap(find.byKey(Key('addMeal_${meal.name}')));
     await tester.pumpAndSettle();
-    await tester.enterText(
-      find.byKey(const Key('foodNameField')),
-      'ข้าวมันไก่',
-    );
-    await tester.enterText(find.byKey(const Key('caloriesField')), '520');
-    await tester.tap(find.text('มื้อกลางวัน'));
+    await tester.tap(find.byKey(const Key('manualFoodButton')));
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> addViaDialog(
+    WidgetTester tester,
+    String name,
+    String kcal,
+  ) async {
+    await tester.enterText(find.byKey(const Key('foodNameField')), name);
+    await tester.enterText(find.byKey(const Key('caloriesField')), kcal);
     await tester.tap(find.byKey(const Key('saveFoodButton')));
     await tester.pumpAndSettle();
+  }
 
-    expect(find.text('ข้าวมันไก่'), findsOneWidget);
-    expect(totalText(tester), '520'); // ปรับ
-    expect(repo.items.single.mealType, MealType.lunch);
-  });
+  FoodEntry entry(String id, String name, double kcal, MealType meal) =>
+      FoodEntry(
+        id: id,
+        userId: 'test-uid',
+        name: name,
+        calories: kcal,
+        mealType: meal,
+        eatenAt: DateTime.now(),
+      );
 
-  testWidgets('กล่องเพิ่มอาหาร: ไม่กรอก → แจ้งเตือน และไม่บันทึก', (
+  testWidgets(
+    'ยังไม่มีรายการ → ข้อความว่าง 0 จาก 2,000 kcal และการ์ดครบ 4 มื้อ',
+    (tester) async {
+      await openApp(tester);
+
+      expect(find.byKey(const Key('emptyState')), findsOneWidget);
+      expect(totalText(tester), '0');
+      expect(find.text('จาก 2,000 kcal'), findsOneWidget);
+      for (final meal in MealType.values) {
+        expect(mealTitle(tester, meal), meal.label);
+      }
+      expect(find.text('ยังไม่มีรายการ'), findsNWidgets(4));
+    },
+  );
+
+  testWidgets(
+    'กด + ที่มื้อกลางวัน → เลือกมื้อกลางวันไว้ให้ และบันทึกลงมื้อนั้น',
+    (tester) async {
+      await openApp(tester);
+
+      await openManualForm(tester, MealType.lunch);
+      final lunchChip = tester.widget<ChoiceChip>(
+        find.widgetWithText(ChoiceChip, 'มื้อกลางวัน'),
+      );
+      expect(lunchChip.selected, isTrue);
+
+      await addViaDialog(tester, 'ข้าวมันไก่', '520');
+
+      expect(find.text('ข้าวมันไก่'), findsOneWidget);
+      expect(totalText(tester), '520');
+      expect(mealTitle(tester, MealType.lunch), 'มื้อกลางวัน · 520 kcal');
+      expect(
+        mealTitle(tester, MealType.breakfast),
+        'มื้อเช้า',
+      ); // มื้ออื่นยังว่าง
+      expect(repo.items.single.mealType, MealType.lunch);
+    },
+  );
+
+  testWidgets(
+    'เปิดจากมื้อเช้า แล้วเปลี่ยนเป็นมื้อเย็นในกล่อง → บันทึกเป็นมื้อเย็น',
+    (tester) async {
+      await openApp(tester);
+
+      await openManualForm(tester, MealType.breakfast);
+      await tester.tap(find.widgetWithText(ChoiceChip, 'มื้อเย็น'));
+      await tester.pumpAndSettle();
+      await addViaDialog(tester, 'ต้มยำกุ้ง', '300');
+
+      expect(repo.items.single.mealType, MealType.dinner);
+      expect(mealTitle(tester, MealType.dinner), 'มื้อเย็น · 300 kcal');
+    },
+  );
+
+  testWidgets('ฟอร์มสร้างอาหารเอง: ไม่กรอก → แจ้งเตือน และไม่บันทึก', (
     tester,
   ) async {
     await openApp(tester);
 
-    await tester.tap(find.byKey(const Key('addFoodButton')));
-    await tester.pumpAndSettle();
+    await openManualForm(tester, MealType.lunch);
     await tester.enterText(find.byKey(const Key('caloriesField')), 'abc');
     await tester.tap(find.byKey(const Key('saveFoodButton')));
     await tester.pumpAndSettle();
@@ -84,17 +147,28 @@ void main() {
     expect(repo.items, isEmpty);
   });
 
+  testWidgets('การ์ดแต่ละมื้อแสดงแคลอรี่รวมและรายการของมื้อนั้น', (
+    tester,
+  ) async {
+    repo.items.addAll([
+      entry('e1', 'โจ๊กหมู', 300, MealType.breakfast),
+      entry('e2', 'ไข่ต้ม', 120, MealType.breakfast),
+      entry('e3', 'ข้าวมันไก่', 520, MealType.lunch),
+    ]);
+    await openApp(tester);
+
+    expect(mealTitle(tester, MealType.breakfast), 'มื้อเช้า · 420 kcal');
+    expect(mealTitle(tester, MealType.lunch), 'มื้อกลางวัน · 520 kcal');
+    expect(mealTitle(tester, MealType.dinner), 'มื้อเย็น');
+    expect(find.text('โจ๊กหมู'), findsOneWidget);
+    expect(find.text('ไข่ต้ม'), findsOneWidget);
+    expect(find.text('ข้าวมันไก่'), findsOneWidget);
+    expect(totalText(tester), '940');
+    expect(find.byKey(const Key('emptyState')), findsNothing);
+  });
+
   testWidgets('กดลบ → รายการหายไป', (tester) async {
-    repo.items.add(
-      FoodEntry(
-        id: 'e1',
-        userId: 'test-uid',
-        name: 'ส้มตำ',
-        calories: 120,
-        mealType: MealType.lunch,
-        eatenAt: DateTime.now(),
-      ),
-    );
+    repo.items.add(entry('e1', 'ส้มตำ', 120, MealType.lunch));
     await openApp(tester);
     expect(find.text('ส้มตำ'), findsOneWidget);
 

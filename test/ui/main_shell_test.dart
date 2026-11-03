@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:food_log/app/app.dart';
 
-import '../helpers/fake_auth_service.dart';
-import '../helpers/fake_food_repository.dart';
 import '../helpers/fake_ai_food_analyzer.dart';
+import '../helpers/fake_auth_service.dart';
 import '../helpers/fake_food_api_service.dart';
+import '../helpers/fake_food_repository.dart';
 
 void main() {
   late FakeAuthService auth;
@@ -18,7 +18,7 @@ void main() {
     ); // ล็อกอินไว้ก่อน
   });
 
-   Future<void> openApp(WidgetTester tester) async {
+  Future<void> openApp(WidgetTester tester) async {
     await tester.pumpWidget(
       FoodLogApp(
         auth: auth,
@@ -29,7 +29,7 @@ void main() {
     );
     await tester.pumpAndSettle();
   }
-  
+
   Future<void> tapTab(WidgetTester tester, String key) async {
     await tester.tap(find.byKey(Key(key)));
     await tester.pumpAndSettle();
@@ -64,11 +64,25 @@ void main() {
     expect(find.byKey(const Key('calorieTotal')), findsOneWidget);
   });
 
-  testWidgets('มีปุ่มสแกนตรงกลาง และกดได้โดยไม่พัง', (tester) async {
+  testWidgets('กด "ดูสถิติ" ในหน้าหลัก → ไปแท็บสถิติ', (tester) async {
     await openApp(tester);
 
-    expect(find.byKey(const Key('scanButton')), findsOneWidget);
+    final link = find.byKey(const Key('openStatsButton'));
+    await tester.ensureVisible(link);
+    await tester.tap(link);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('statsTab')), findsOneWidget);
+  });
+
+  testWidgets('กดปุ่มสแกนตรงกลาง → เปิดหน้าสแกน และกดย้อนกลับได้', (tester) async {
+    await openApp(tester);
+
     await tester.tap(find.byKey(const Key('scanButton')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('scannerScreen')), findsOneWidget);
+
+    await tester.pageBack();
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('calorieTotal')), findsOneWidget);
   });

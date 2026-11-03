@@ -5,7 +5,9 @@ import '../../services/auth_service.dart';
 import '../../state/food_log_controller.dart';
 import 'add_food_screen.dart';
 import 'home_screen.dart';
+import 'profile_screen.dart';
 import 'scanner_screen.dart';
+import 'stats_screen.dart';
 
 /// โครงหลักหลังล็อกอิน: เมนูล่าง 4 แท็บ + ปุ่มสแกนตรงกลาง
 class MainShell extends StatefulWidget {
@@ -30,16 +32,24 @@ class _MainShellState extends State<MainShell> {
       body: IndexedStack(
         index: _index,
         children: [
-          HomeScreen(user: widget.user, auth: widget.auth),
+          HomeScreen(
+            user: widget.user,
+            auth: widget.auth,
+            onOpenStats: () => setState(() => _index = 2), // ปุ่ม "ดูสถิติ"
+          ),
           const AddFoodScreen(key: Key('logTab')),
-          const _PlaceholderTab(key: Key('statsTab'), title: 'สถิติ'),
-          const _PlaceholderTab(key: Key('profileTab'), title: 'โปรไฟล์'),
+          const StatsScreen(key: Key('statsTab')),
+          ProfileScreen(
+            key: const Key('profileTab'),
+            user: widget.user,
+            auth: widget.auth,
+          ),
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
         key: const Key('scanButton'),
-        heroTag: null, // กันชนกับปุ่ม + ในหน้า Home ที่มี FAB อยู่แล้ว
+        heroTag: null,
         tooltip: 'สแกนอาหาร',
         backgroundColor: scheme.primary,
         foregroundColor: scheme.onPrimary,
@@ -87,26 +97,6 @@ class _MainShellState extends State<MainShell> {
             label: 'โปรไฟล์',
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// หน้าชั่วคราวของแท็บที่ยังไม่ได้ทำ (จะถูกแทนใน branch ถัด ๆ ไป)
-class _PlaceholderTab extends StatelessWidget {
-  const _PlaceholderTab({super.key, required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: Center(
-        child: Text(
-          'หน้า$title\n(กำลังจัดทำ)',
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
       ),
     );
   }
