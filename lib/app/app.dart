@@ -2,26 +2,51 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../ui/screens/main_shell.dart';
 import '../data/food_repository.dart';
+import '../services/ai_food_analyzer.dart';
 import '../services/auth_service.dart';
+import '../services/food_api_service.dart';
+import '../services/photo_picker.dart';
 import '../state/food_log_controller.dart';
 import '../ui/screens/login_screen.dart';
 import '../ui/screens/welcome_screen.dart';
 import 'theme.dart';
 
 class FoodLogApp extends StatelessWidget {
-  const FoodLogApp({super.key, required this.auth, required this.repository});
+  const FoodLogApp({
+    super.key,
+    required this.auth,
+    required this.repository,
+    required this.foodApi,
+    required this.aiAnalyzer,
+    this.photoPicker,
+  });
 
   /// ส่งของจริงตอนรันแอป หรือของปลอมตอนเทสต์
   final AuthService auth;
   final FoodRepository repository;
+  final FoodApiService foodApi;
+  final AiFoodAnalyzer aiAnalyzer;
+
+  /// ไม่ส่งมา = ใช้กล้อง/แกลเลอรีจริง (เทสต์ส่งของปลอมมา)
+  final PhotoPicker? photoPicker;
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Food Log',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.light(),
-      home: AuthGate(auth: auth, repository: repository),
+    // ไว้เหนือ MaterialApp เพื่อให้ทุกหน้า (รวมหน้าที่ push) เรียกใช้ผ่าน Provider ได้
+    return MultiProvider(
+      providers: [
+        Provider<FoodApiService>.value(value: foodApi),
+        Provider<AiFoodAnalyzer>.value(value: aiAnalyzer),
+        Provider<PhotoPicker>.value(
+          value: photoPicker ?? const ImagePickerPhotoPicker(),
+        ),
+      ],
+      child: MaterialApp(
+        title: 'Food Log',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.light(),
+        home: AuthGate(auth: auth, repository: repository),
+      ),
     );
   }
 }

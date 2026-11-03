@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:food_log/app/app.dart';
 
+import '../helpers/fake_ai_food_analyzer.dart';
 import '../helpers/fake_auth_service.dart';
+import '../helpers/fake_food_api_service.dart';
 import '../helpers/fake_food_repository.dart';
 
 void main() {
@@ -20,7 +22,14 @@ void main() {
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
 
-    await tester.pumpWidget(FoodLogApp(auth: auth, repository: repo));
+    await tester.pumpWidget(
+      FoodLogApp(
+        auth: auth,
+        repository: repo,
+        foodApi: FakeFoodApiService(),
+        aiAnalyzer: FakeAiFoodAnalyzer(),
+      ),
+    );
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('navProfile')));
     await tester.pumpAndSettle();

@@ -4,7 +4,9 @@ import 'package:food_log/app/app.dart';
 import 'package:food_log/models/food_entry.dart';
 import 'package:food_log/models/meal_type.dart';
 
+import '../helpers/fake_ai_food_analyzer.dart';
 import '../helpers/fake_auth_service.dart';
+import '../helpers/fake_food_api_service.dart';
 import '../helpers/fake_food_repository.dart';
 
 void main() {
@@ -26,7 +28,14 @@ void main() {
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
 
-    await tester.pumpWidget(FoodLogApp(auth: auth, repository: repo));
+    await tester.pumpWidget(
+      FoodLogApp(
+        auth: auth,
+        repository: repo,
+        foodApi: FakeFoodApiService(),
+        aiAnalyzer: FakeAiFoodAnalyzer(),
+      ),
+    );
     await tester.pumpAndSettle();
   }
 
@@ -39,6 +48,14 @@ void main() {
       .widget<Text>(find.byKey(Key('mealTitle_${meal.name}')))
       .textSpan!
       .toPlainText();
+
+  /// กด + ที่การ์ดมื้อ → หน้าเพิ่มอาหาร → "สร้างอาหารเอง"
+  Future<void> openManualForm(WidgetTester tester, MealType meal) async {
+    await tester.tap(find.byKey(Key('addMeal_${meal.name}')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('manualFoodButton')));
+    await tester.pumpAndSettle();
+  }
 
   Future<void> addViaDialog(
     WidgetTester tester,
@@ -81,8 +98,7 @@ void main() {
     (tester) async {
       await openApp(tester);
 
-      await tester.tap(find.byKey(const Key('addMeal_lunch')));
-      await tester.pumpAndSettle();
+      await openManualForm(tester, MealType.lunch);
       final lunchChip = tester.widget<ChoiceChip>(
         find.widgetWithText(ChoiceChip, 'มื้อกลางวัน'),
       );
@@ -106,9 +122,9 @@ void main() {
     (tester) async {
       await openApp(tester);
 
-      await tester.tap(find.byKey(const Key('addMeal_breakfast')));
-      await tester.pumpAndSettle();
+      await openManualForm(tester, MealType.breakfast);
       await tester.tap(find.widgetWithText(ChoiceChip, 'มื้อเย็น'));
+      await tester.pumpAndSettle();
       await addViaDialog(tester, 'ต้มยำกุ้ง', '300');
 
       expect(repo.items.single.mealType, MealType.dinner);
@@ -116,13 +132,12 @@ void main() {
     },
   );
 
-  testWidgets('กล่องเพิ่มอาหาร: ไม่กรอก → แจ้งเตือน และไม่บันทึก', (
+  testWidgets('ฟอร์มสร้างอาหารเอง: ไม่กรอก → แจ้งเตือน และไม่บันทึก', (
     tester,
   ) async {
     await openApp(tester);
 
-    await tester.tap(find.byKey(const Key('addMeal_lunch')));
-    await tester.pumpAndSettle();
+    await openManualForm(tester, MealType.lunch);
     await tester.enterText(find.byKey(const Key('caloriesField')), 'abc');
     await tester.tap(find.byKey(const Key('saveFoodButton')));
     await tester.pumpAndSettle();

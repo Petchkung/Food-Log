@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:food_log/app/app.dart';
 
+import '../helpers/fake_ai_food_analyzer.dart';
 import '../helpers/fake_auth_service.dart';
+import '../helpers/fake_food_api_service.dart';
 import '../helpers/fake_food_repository.dart';
 
 void main() {
@@ -18,7 +20,12 @@ void main() {
 
   Future<void> openApp(WidgetTester tester) async {
     await tester.pumpWidget(
-      FoodLogApp(auth: auth, repository: FakeFoodRepository()),
+      FoodLogApp(
+        auth: auth,
+        repository: FakeFoodRepository(),
+        foodApi: FakeFoodApiService(),
+        aiAnalyzer: FakeAiFoodAnalyzer(),
+      ),
     );
     await tester.pumpAndSettle();
   }
@@ -68,11 +75,14 @@ void main() {
     expect(find.byKey(const Key('statsTab')), findsOneWidget);
   });
 
-  testWidgets('มีปุ่มสแกนตรงกลาง และกดได้โดยไม่พัง', (tester) async {
+  testWidgets('กดปุ่มสแกนตรงกลาง → เปิดหน้าสแกน และกดย้อนกลับได้', (tester) async {
     await openApp(tester);
 
-    expect(find.byKey(const Key('scanButton')), findsOneWidget);
     await tester.tap(find.byKey(const Key('scanButton')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('scannerScreen')), findsOneWidget);
+
+    await tester.pageBack();
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('calorieTotal')), findsOneWidget);
   });

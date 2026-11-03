@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../services/auth_service.dart';
+import '../../state/food_log_controller.dart';
+import 'add_food_screen.dart';
 import 'home_screen.dart';
 import 'profile_screen.dart';
+import 'scanner_screen.dart';
 import 'stats_screen.dart';
 
 /// โครงหลักหลังล็อกอิน: เมนูล่าง 4 แท็บ + ปุ่มสแกนตรงกลาง
@@ -33,7 +37,7 @@ class _MainShellState extends State<MainShell> {
             auth: widget.auth,
             onOpenStats: () => setState(() => _index = 2), // ปุ่ม "ดูสถิติ"
           ),
-          const _PlaceholderTab(key: Key('logTab'), title: 'บันทึก'),
+          const AddFoodScreen(key: Key('logTab')),
           const StatsScreen(key: Key('statsTab')),
           ProfileScreen(
             key: const Key('profileTab'),
@@ -51,7 +55,16 @@ class _MainShellState extends State<MainShell> {
         foregroundColor: scheme.onPrimary,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         onPressed: () {
-          // TODO(เค้ก): ต่อหน้าสแกนอาหาร (feature/ai-scan)
+          // หน้าที่ push อยู่เหนือ Provider จึงส่ง controller ต่อให้
+          final controller = context.read<FoodLogController>();
+          Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => ChangeNotifierProvider<FoodLogController>.value(
+                value: controller,
+                child: const ScannerScreen(),
+              ),
+            ),
+          );
         },
         child: const Icon(Icons.center_focus_strong_outlined),
       ),
@@ -84,26 +97,6 @@ class _MainShellState extends State<MainShell> {
             label: 'โปรไฟล์',
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// หน้าชั่วคราวของแท็บที่ยังไม่ได้ทำ (แท็บบันทึก เป็นงานของเค้ก)
-class _PlaceholderTab extends StatelessWidget {
-  const _PlaceholderTab({super.key, required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: Center(
-        child: Text(
-          'หน้า$title\n(กำลังจัดทำ)',
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
       ),
     );
   }
